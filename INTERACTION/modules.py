@@ -1,3 +1,4 @@
+from bot.bot import Bot
 import requests
 import configparser
 
@@ -25,5 +26,8 @@ class Interaction():
         self.UC = user_city
         
     def func_1():
-        get_user_info = 
+        user_info = Bot.get_user_info()
+        return user_info
+    
+print(Interaction.func_1())
         
