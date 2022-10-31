@@ -5,7 +5,6 @@ from dotenv import load_dotenv, find_dotenv
 
 load_dotenv(find_dotenv())
 DSN = os.getenv('DSN')
-# DSN = 'postgresql://postgres:K.,bvfz777@localhost:5432/VKinder'
 engine = sq.create_engine(DSN)
 
 Base = declarative_base()
