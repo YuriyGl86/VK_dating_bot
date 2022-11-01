@@ -3,7 +3,7 @@ from bot.bot_token import key
 
 
 def main():
-    bot = Bot(key) # Создаем объект класса Bot через который и будем управлять ботом
+    bot = Bot(key)  # Создаем объект класса Bot через который и будем управлять ботом
     candidate = None  # Переменная, хранящая id предложенного кандидата
 
     for event in bot.longpoll.listen():  # Запускаем бесконечный цикл, начинаем слушать сервер ВК
@@ -11,33 +11,33 @@ def main():
             received_message = event.text.lower()  # Сохраняем полученное сообщение
             sender = event.user_id  # Получаем ID пользователя, с которым общаемся
 
-            user = bot.get_user_info(sender) # Получаем информацию о пользователе в виде json, который отпраим в БД
+            user = bot.get_user_info(sender)  # Получаем информацию о пользователе в виде json, который отправим в БД
             print(user)
             user_name = user['first_name']
-
+            # здесь будет вызов функции от Артёма для записи юзера в БД
 
             if received_message in ('привет', 'начать'):
-                bot.write_message(sender, f'Добрый день, {user_name}, я умный бот. Воспользуйтесь одной из моих функций')
-                # здесь будет вызов функции для записи юзера в БД
+                bot.write_message(sender,
+                                  f'Добрый день, {user_name}, я умный бот. Воспользуйтесь одной из моих функций')
 
             elif received_message == 'в избранное':
                 if candidate:
-                    # здесь будет вызов функции для записи candidate в Избранное
+                    # здесь будет вызов функции от Артёма для записи candidate в Избранное
                     bot.write_message(sender, 'Вызываем функцию добавления в избранное')
                     candidate = None
                 else:
                     bot.write_message(sender, 'Сначала выберите кандидата, кого добавлять в избранное')
 
             elif received_message == 'предложить кандидата':
-                candidate = bot.send_candidate(sender)
+                candidate = bot.send_candidate(user)
 
             elif received_message == 'список избранных':
-                # Здесь будет вызов функции для выборки из БД из табл избранного по id пользователя
                 bot.write_message(sender, 'Вызываем функцию вывода списка избранных')
+                bot.send_favorites_list(sender)
 
             elif received_message == 'в черный список':
                 if candidate:
-                    # здесь будет вызов функции для записи candidate в ЧС
+                    # здесь будет вызов функции от Артёма для записи candidate в ЧС
                     bot.write_message(sender, 'Вызываем функцию добавления в ЧС')
                     candidate = None
                 else:
@@ -50,4 +50,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
