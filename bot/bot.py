@@ -15,13 +15,17 @@ class Bot:
         self.authorize = vk_api.VkApi(token=key)  # Авторизуемся в ВК для управления нашей группой, используя token
         self.longpoll = VkLongPoll(self.authorize)  # Выбираем тип используемого API - Long Poll API
         self.upload = VkUpload(self.authorize)  # Загрузчик изображений на сервер в ВК
-        self.VkEventType = VkEventType
+        self.VkEventType = VkEventType  # Для проверки типа произошедешего события в группе ( что пришло новое сооьщение)
 
     @staticmethod
     def __get_keyboard_for_bot():
+        """
+        Метод создает клавиатуру (кнопки) для бота
+        :return: json клавиатуры, который можно прикрепить к отправляемому сообщению
+        """
         keyboard = VkKeyboard(one_time=False)  # создаем клавиатуру для бота
-        keyboard.add_button('К следующему', color=VkKeyboardColor.PRIMARY)
-        keyboard.add_line()
+        keyboard.add_button('Предложить кандидата', color=VkKeyboardColor.PRIMARY)  # добавляем кнопку
+        keyboard.add_line() # добавляем перенос на следующую строку
         keyboard.add_button('В избранное', color=VkKeyboardColor.POSITIVE)
         keyboard.add_button('В черный список', color=VkKeyboardColor.NEGATIVE)
         keyboard.add_line()
@@ -30,21 +34,36 @@ class Bot:
         return keyboard_for_bot
 
     def write_message(self, sender, message, attachment=None):
+        """
+        Метод для отправки сообщения ботом от имени сообщества.
+        Параметры:
+        :param sender (str) - id пользователя, в беседу с которым отправляем сообщение
+        :param message (str) - текст сообщения
+        :param attachment (str) - если указан, то в сообщение будет прикреплены вложения. Должен быть указан в специальном
+        формате в соответствии с документацией https://dev.vk.com/method/messages.send
+        """
+
         self.authorize.method('messages.send',
                               {'user_id': sender, 'message': message, 'random_id': get_random_id(),
                                'attachment': attachment,
                                'keyboard': self.__get_keyboard_for_bot()})
 
     def upload_photo(self, url):
-        img = requests.get(url).content
-        f = BytesIO(img)
+        """
+        Метод для загрузки изображения, доступного по ссылке, на сервер ВК. Возвращает параметры загруженного на
+        сервер файла в виде строки в специальном формате, которые необходимы, чтобы прикрепить загруженный файл к
+        сообщению
 
-        response = self.upload.photo_messages(f)[0]
+        """
+        img = requests.get(url).content # Получаем фото по ссылке в байтовом виде
+        f = BytesIO(img) # Загружаем фото в оперативную память, чтобы не сохранять на диске
+
+        response = self.upload.photo_messages(f)[0]  # Загружаем фото на сервер ВК, получаем json c параметрами загрузки
 
         owner_id = response['owner_id']
         photo_id = response['id']
         access_key = response['access_key']
-        attachment = f'photo{owner_id}_{photo_id}'  # _{access_key}
+        attachment = f'photo{owner_id}_{photo_id}'  # Собираем параметры загруженного файла в нужный формат в виде строки
         return attachment
 
     def get_attachment(self, photo_link_list: list):
@@ -57,10 +76,11 @@ class Bot:
 
     def get_user_info(self, user_id):
         user_info = self.authorize.method('users.get', {"user_ids": user_id, 'fields': 'city, bdate, sex'})[0]
-        return user_info['first_name'], user_info['last_name'], user_info['city']['title'], user_info['bdate'], user_info['sex']
+        return user_info #['first_name'], user_info['last_name'], user_info['city']['title'], user_info['bdate'], user_info['sex']
 
     def send_candidate(self, sender):
-        # вызываем функцию подборакандидата, получаем данные и ссылки
+
+        # вызываем функцию подбора кандидата, получаем данные и ссылки
         photo_list = ['https://vdp.mycdn.me/getImage?id=411588037337&idx=0&thumbType=32',
                       'https://www.mam4.ru/media/upload/user/5422/19/6170.jpg',
                       'https://avatanplus.com/files/resources/mid/5ab5736f0579416254cae9ae.png',
