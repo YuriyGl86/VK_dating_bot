@@ -40,7 +40,7 @@ class Interaction():
             url,
             params = {
             'access_token': 'vk1.a.xV9SUyov3GT2KqLJny5H1LEaJ1fkmWY5w29S1sfEzXsJ8wbjy1rUX4IPBgsj_QGfJ24tu-F62FB-qDpzm8kGNRcd2YRaX5S5n2I7zUW0B6PljetGcH7hTnCl14aLd8YWCR4-KUlIuBdiMePiWWtKD_xsS88Xm1ZBvPveM-uFuisOJksyZq1Ra6bQdc1GMrlr8-_aQ0zcjSLv44x1AdRLeg',#self.UAT,
-            'owner_id': '31723805',
+            'owner_id': '31539255',
             'v': '5.131',#self.V,
             'album_id': 'profile',#self.A,
             'extended': True,#self.EX,
@@ -76,7 +76,7 @@ class Interaction():
             url,
             params = {
                 'access_token': 'vk1.a.xV9SUyov3GT2KqLJny5H1LEaJ1fkmWY5w29S1sfEzXsJ8wbjy1rUX4IPBgsj_QGfJ24tu-F62FB-qDpzm8kGNRcd2YRaX5S5n2I7zUW0B6PljetGcH7hTnCl14aLd8YWCR4-KUlIuBdiMePiWWtKD_xsS88Xm1ZBvPveM-uFuisOJksyZq1Ra6bQdc1GMrlr8-_aQ0zcjSLv44x1AdRLeg',
-                'user_ids': '31723805',
+                'user_ids': '31539255',
                 'fields': ['bdate', 'sex', 'city'],
                 'v': '5.131'
             })
@@ -85,9 +85,6 @@ class Interaction():
 def func():
     for i in Interaction.candidat_info():
         i.update(Interaction.candidate_photo())
-        return json.dumps(i)
+        return i
     
-print(func())
-    
-
-    
+print(func())    
