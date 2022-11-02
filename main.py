@@ -1,6 +1,6 @@
 from bot.bot import Bot
 from bot.bot_token import key
-
+# from DB.db import rec_favorites, rec_blocked, rec_vk_user
 
 def main():
     bot = Bot(key)  # Создаем объект класса Bot через который и будем управлять ботом
@@ -14,16 +14,20 @@ def main():
             user = bot.get_user_info(sender)  # Получаем информацию о пользователе в виде json, который отправим в БД
             print(user)
             user_name = user['first_name']
-            # здесь будет вызов функции от Артёма для записи юзера в БД
+            # rec_vk_user(user) здесь будет вызов функции от Артёма для записи юзера в БД
 
             if received_message in ('привет', 'начать'):
                 bot.write_message(sender,
-                                  f'Добрый день, {user_name}, я умный бот. Воспользуйтесь одной из моих функций')
+                                  f'Привет, {user_name}, я умный бот. Я могу найти для вас отличного кандидата '
+                                  f'для знакомства. Воспользуйтесь одной из моих функций. Для этого '
+                                  f'введите команду сами или нажмите на соответствующую кнопку. Я понимаю следующие '
+                                  f'команды: \n"Предложить кандидата"\n"В избранное"\n"В черный список"\n'
+                                  f'"Список избранных"')
 
             elif received_message == 'в избранное':
                 if candidate:
-                    # здесь будет вызов функции от Артёма для записи candidate в Избранное
-                    bot.write_message(sender, 'Вызываем функцию добавления в избранное')
+                    #rec_favorites(sender, candidate) здесь будет вызов функции от Артёма для записи candidate в Избранное
+                    bot.write_message(sender, 'Предложенный кандидат добавлен в избранное')
                     candidate = None
                 else:
                     bot.write_message(sender, 'Сначала выберите кандидата, кого добавлять в избранное')
@@ -31,14 +35,15 @@ def main():
             elif received_message == 'предложить кандидата':
                 candidate = bot.send_candidate(user)
 
+
             elif received_message == 'список избранных':
-                bot.write_message(sender, 'Вызываем функцию вывода списка избранных')
+                bot.write_message(sender, 'Ваш список избранных:')
                 bot.send_favorites_list(sender)
 
             elif received_message == 'в черный список':
                 if candidate:
-                    # здесь будет вызов функции от Артёма для записи candidate в ЧС
-                    bot.write_message(sender, 'Вызываем функцию добавления в ЧС')
+                    # rec_blocked(sender, candidate) здесь будет вызов функции от Артёма для записи candidate в ЧС
+                    bot.write_message(sender, 'Предложенный кандидат добавлен в черный список')
                     candidate = None
                 else:
                     bot.write_message(sender, 'Сначала выберите кандидата, кого добавлять в черный список')
