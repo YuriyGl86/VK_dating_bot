@@ -10,18 +10,27 @@ from vk_api.longpoll import VkEventType
 
 
 class Bot:
+    """
+    Класс, описывающий работу бота для чата в ВК
+    :param key: - token c правами для доступа к сообщениям и фотографиям сообщества ВК
+    :type key: str
+    """
 
-    def __init__(self, key):
+    def __init__(self, key: str):
         self.authorize = vk_api.VkApi(token=key)  # Авторизуемся в ВК для управления нашей группой, используя token
         self.longpoll = VkLongPoll(self.authorize)  # Выбираем тип используемого API - Long Poll API
         self.upload = VkUpload(self.authorize)  # Загрузчик изображений на сервер в ВК
-        self.VkEventType = VkEventType
+        self.VkEventType = VkEventType  # Для проверки типа произошедешего события в группе ( что пришло новое сооьщение)
 
     @staticmethod
-    def __get_keyboard_for_bot():
+    def __get_keyboard_for_bot() -> dict:
+        """
+        Метод создает клавиатуру (кнопки) для бота
+        :return: json клавиатуры, который можно прикрепить к отправляемому сообщению
+        """
         keyboard = VkKeyboard(one_time=False)  # создаем клавиатуру для бота
-        keyboard.add_button('К следующему', color=VkKeyboardColor.PRIMARY)
-        keyboard.add_line()
+        keyboard.add_button('Предложить кандидата', color=VkKeyboardColor.PRIMARY)  # добавляем кнопку
+        keyboard.add_line()  # добавляем перенос на следующую строку
         keyboard.add_button('В избранное', color=VkKeyboardColor.POSITIVE)
         keyboard.add_button('В черный список', color=VkKeyboardColor.NEGATIVE)
         keyboard.add_line()
@@ -29,25 +38,52 @@ class Bot:
         keyboard_for_bot = keyboard.get_keyboard()
         return keyboard_for_bot
 
-    def write_message(self, sender, message, attachment=None):
+    def write_message(self, sender: int, message: str, attachment: str = None) -> None:
+        """
+        Метод для отправки сообщения ботом от имени сообщества.
+        Параметры:
+        :param sender: id пользователя, в беседу с которым отправляем сообщение.
+        :type sender: int
+
+        :param message: текст сообщения
+        :type message: str
+
+        :param attachment: если указан, то в сообщение будет прикреплены вложения. Должен быть указан в специальном
+        формате в соответствии с документацией https://dev.vk.com/method/messages.send
+        :type attachment: str
+        """
+
         self.authorize.method('messages.send',
                               {'user_id': sender, 'message': message, 'random_id': get_random_id(),
                                'attachment': attachment,
                                'keyboard': self.__get_keyboard_for_bot()})
 
-    def upload_photo(self, url):
-        img = requests.get(url).content
-        f = BytesIO(img)
+    def upload_photo(self, url: str) -> str:
+        """
+        Метод для загрузки одного изображения, доступного по ссылке, на сервер ВК. Возвращает параметры загруженного на
+        сервер файла в виде строки в специальном формате, которые необходимы, чтобы прикрепить загруженный файл к
+        сообщению.
+        :param url: прямая ссылка на фотографию.
+        :type url: str
+        """
+        img = requests.get(url).content  # Получаем фото по ссылке в байтовом виде
+        f = BytesIO(img)  # Загружаем фото в оперативную память, чтобы не сохранять на диске
 
-        response = self.upload.photo_messages(f)[0]
+        response = self.upload.photo_messages(f)[0]  # Загружаем фото на сервер ВК, получаем json c параметрами загрузки
 
         owner_id = response['owner_id']
         photo_id = response['id']
         access_key = response['access_key']
-        attachment = f'photo{owner_id}_{photo_id}'  # _{access_key}
+        attachment = f'photo{owner_id}_{photo_id}'  # Собираем параметры загруженного файла в нужный формат в виде строки
         return attachment
 
-    def get_attachment(self, photo_link_list: list):
+    def get_attachment(self, photo_link_list: list[str]) -> str:
+        """
+        Метод загружает фотографии из списка на сервер ВК
+        :param photo_link_list: список ссылок на фотографии.
+        :type photo_link_list: list
+        :return: Строка в формате <type><owner_id>_<media_id> с параметрами всех загруженных изображений через запятую
+        """
         attachment_list = []
         for link in photo_link_list:
             uploaded_photo = self.upload_photo(link)
@@ -55,19 +91,43 @@ class Bot:
         attachment_info = ','.join(attachment_list)
         return attachment_info
 
-    def get_user_info(self, user_id):
+    def get_user_info(self, user_id: int) -> dict:
+        """
+        Метод получает информацию о пользователе ВК по его id
+        :param user_id: id пользователя ВК
+        :type user_id: int
+        :return: словарь, содержащий ключи id, bdate, city, sex, first_name, last_name и другие.
+        """
         user_info = self.authorize.method('users.get', {"user_ids": user_id, 'fields': 'city, bdate, sex'})[0]
-        return user_info['first_name'], user_info['last_name'], user_info['city']['title'], user_info['bdate'], user_info['sex']
+        return user_info
 
-    def send_candidate(self, sender):
-        # вызываем функцию подборакандидата, получаем данные и ссылки
+    def send_candidate(self, user: dict) -> tuple:
+        """
+        Метод, который будет генерировать кандидата для знакомства и отправлять его пользователю в чат.
+        :param user: словарь с данными пользователя, содержащий в т.ч. ключ с id.
+        :type user: dict
+        :return: данные кандидата
+        """
+        # вызываем функцию подбора кандидата от Марка, получаем данные кандидата и ссылки
         photo_list = ['https://vdp.mycdn.me/getImage?id=411588037337&idx=0&thumbType=32',
                       'https://www.mam4.ru/media/upload/user/5422/19/6170.jpg',
                       'https://avatanplus.com/files/resources/mid/5ab5736f0579416254cae9ae.png',
                       ]
         candidate_id = 'candidate_id'
         fio = "fio"
-        link = "link"
+        link = 'https://vk.com/id' + str(candidate_id)
         attachment_photos = self.get_attachment(photo_list)
-        self.write_message(sender, f'Вот отличный кандидат:\n{fio}\n{link}', attachment=attachment_photos)
+        self.write_message(user['id'], f'Вот отличный кандидат:\n{fio}\n{link}', attachment=attachment_photos)
         return candidate_id, fio, link, photo_list
+
+    def send_favorites_list(self, sender: int) -> None:
+        """
+        Метод получает список избранного для указанного пользователя и отправляет в чат с пользователем в нужном формате.
+        :param sender: id ткущего пользователя, который общается с ботом.
+        :type sender: int
+        """
+        # здесь будет вызов функции от Артёма, которая возвращает список избранного для данного user
+        favorites_list = ['82185', '82186', '82187']
+        for candidate_id in favorites_list:
+            link = 'https://vk.com/id' + str(candidate_id)
+            self.write_message(sender, link)
