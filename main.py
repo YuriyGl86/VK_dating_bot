@@ -4,7 +4,7 @@ import configparser
 # from DB.db import rec_favorites, rec_blocked, rec_vk_user
 
 config = configparser.ConfigParser()
-config.read('token_new.ini')
+config.read('new_token.ini')
 KEY = config['VK_API']['key_oauth']
 
 def main():
