@@ -10,7 +10,9 @@ config.read('token.ini')
 TOKEN = config['VK_API']['access_token']
 
 class Candidate_selection():
-    '''Класс предоставляет получение информации о пользователях и их фотографий'''
+    '''
+    Класс предоставляет получение информации о пользователях и их фотографий
+    '''
     def __init__(
         self,
         user_access_token = TOKEN,
@@ -26,7 +28,10 @@ class Candidate_selection():
         self.R = rev
         
     def take_user_all_info(self) -> int:
-        user_info = Bot(key).get_user_info(501244677)
+        '''
+        Метод берёт всю информацию о пользователе, который воспользовался ботом
+        '''
+        user_info = Bot(key).get_user_info(Bot().get_user_info())
         return user_info        
         
     def candidate_parametrs(self) -> dict:
