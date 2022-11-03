@@ -125,7 +125,7 @@ class Checking_for_id():
         if self.CID not in self.IL and self.FL:
             return Candidate_selection().unification_info()
         
-print(Checking_for_id().checking_lists())
+# print(Checking_for_id().checking_lists())
 
 
 import configparser
