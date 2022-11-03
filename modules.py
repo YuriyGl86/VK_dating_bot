@@ -1,25 +1,25 @@
 import configparser
 import requests
 from bot.bot import Bot
-from bot.bot_token import key
 import datetime
-from DB.db import rec_favorites, rec_blocked
+# from DB.db import rec_favorites, rec_blocked
 
 config = configparser.ConfigParser()
-config.read('token.ini')
+config.read('new_token.ini')
 TOKEN = config['VK_API']['access_token']
+KEY = config['VK_API']['key_oauth']
 
 class Candidate_selection():
     '''
-    Класс предоставляет получение информации о пользователях и их фотографий
+    Класс предоставляет получение информации о кандидатах и их фотографий
     '''
     def __init__(
         self,
         user_access_token = TOKEN,
         version = '5.131',
         album = 'profile',
-        extended = int(True),
-        rev = int(False)
+        extended = 1,
+        rev = 0
         ):
         self.UAT = user_access_token
         self.V = version
@@ -31,7 +31,7 @@ class Candidate_selection():
         '''
         Метод берёт всю информацию о пользователе, который воспользовался ботом
         '''
-        user_info = Bot(key).get_user_info(Bot().get_user_info())
+        user_info = Bot(KEY).get_user_info(Bot().get_user_info()['id'])
         return user_info        
         
     def candidate_parametrs(self) -> dict:
@@ -108,21 +108,21 @@ class Candidate_selection():
         get_params_info.update(self.candidate_photo())
         return get_params_info
 
-# print(Candidate_selection().unification_info())
+print(Candidate_selection().unification_info())
 
-class Checking_for_id():
-    def __init__(
-        self,
-        ignore_list = rec_blocked(),
-        favorite_list = rec_favorites(),
-        candidate_id = Candidate_selection.unification_info()['id']
-        ):
-        self.IL = ignore_list
-        self.FL = favorite_list
-        self.CID = candidate_id
+# class Checking_for_id():
+#     def __init__(
+#         self,
+#         ignore_list = rec_blocked(),
+#         favorite_list = rec_favorites(),
+#         candidate_id = Candidate_selection.unification_info()['id']
+#         ):
+#         self.IL = ignore_list
+#         self.FL = favorite_list
+#         self.CID = candidate_id
     
-    def checking_lists(self):
-        if self.CID not in self.IL and self.FL:
-            return Candidate_selection().unification_info()
+#     def checking_lists(self):
+#         if self.CID not in self.IL and self.FL:
+#             return Candidate_selection().unification_info()
         
 # print(Checking_for_id().checking_lists())
