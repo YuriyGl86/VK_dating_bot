@@ -1,9 +1,14 @@
 from bot.bot import Bot
 from bot.bot_token import key
+import configparser
 # from DB.db import rec_favorites, rec_blocked, rec_vk_user
 
+config = configparser.ConfigParser()
+config.read('token.ini')
+KEY = config['VK_API']['key_oauth']
+
 def main():
-    bot = Bot(key)  # Создаем объект класса Bot через который и будем управлять ботом
+    bot = Bot(KEY)  # Создаем объект класса Bot через который и будем управлять ботом
     candidate = None  # Переменная, хранящая id предложенного кандидата
 
     for event in bot.longpoll.listen():  # Запускаем бесконечный цикл, начинаем слушать сервер ВК
