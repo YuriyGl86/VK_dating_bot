@@ -10,7 +10,7 @@ config.read('token.ini')
 TOKEN = config['VK_API']['access_token']
 
 class Candidate_selection():
-    
+    '''Класс предоставляет получение информации о пользователях и их фотографий'''
     def __init__(
         self,
         user_access_token = TOKEN,
@@ -121,3 +121,10 @@ class Checking_for_id():
             return Candidate_selection().unification_info()
         
 print(Checking_for_id().checking_lists())
+
+
+import configparser
+
+config = configparser.ConfigParser()
+config.read('token.ini')
+TOKEN = config['VK_API']['access_token']
