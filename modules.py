@@ -126,10 +126,3 @@ class Checking_for_id():
             return Candidate_selection().unification_info()
         
 # print(Checking_for_id().checking_lists())
-
-
-import configparser
-
-config = configparser.ConfigParser()
-config.read('token.ini')
-TOKEN = config['VK_API']['access_token']
