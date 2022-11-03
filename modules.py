@@ -27,7 +27,7 @@ class Candidate_selection():
         self.EX = extended
         self.R = rev
         
-    def take_user_all_info(self) -> int:
+    def take_user_all_info(self) -> dict:
         '''
         Метод берёт всю информацию о пользователе, который воспользовался ботом
         '''
