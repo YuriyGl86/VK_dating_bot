@@ -11,7 +11,10 @@ KEY = config['VK_API']['key_oauth']
 
 class Candidate_selection():
     '''
-    Класс предоставляет получение информации о кандидатах и их фотографий
+    Метод предоставляет получение информации о кандидатах и их фотографий
+    user_access_token -- токен авторизации приложения -> str
+    version -- версия API VK -> str
+    album, extended, rev -- параметры метода photos.get API VK
     '''
     def __init__(
         self,
@@ -29,12 +32,15 @@ class Candidate_selection():
         
     def take_user_all_info(self) -> dict:
         '''
-        Метод берёт всю информацию о пользователе, который воспользовался ботом
+        Функция берёт всю информацию о пользователе, который воспользовался ботом
         '''
         user_info = Bot(KEY).get_user_info(Bot().get_user_info()['id'])
         return user_info        
         
     def candidate_parametrs(self) -> dict:
+        '''
+        Функция, которая по параметрам пользователя подбирает параметры кандидата
+        '''
         try:
             if self.take_user_all_info()['sex'] == 1:
                 natural_sex = 2
@@ -65,6 +71,9 @@ class Candidate_selection():
         return response.json()
      
     def get_parametrs_to_search(self) -> dict:
+        '''
+        Функция, которая определяет параметры фотографий со страницы кандидата
+        '''
         for own_id in self.candidate_parametrs().values():
             candidat_id = own_id['items'][0]['id']
         url = 'https://api.vk.com/method/photos.get'
@@ -83,6 +92,10 @@ class Candidate_selection():
         return response.json()
 
     def candidate_photo(self) -> dict:
+        '''
+        Функция возвращает словарь с тремя самыми поплуярными фотографиями 
+        Размеры фотографий наибольшие из представленных
+        '''
         # метод выборки фотографий с наибольшей популярностью
         list_likes = []
         list_info = []
@@ -104,13 +117,23 @@ class Candidate_selection():
         return {'photo': url_list}
 
     def unification_info(self) -> dict:
+        '''
+        Функция соединяет словарь с параметрами кандидата
+        и словарь с фотографиями кандидата
+        '''
         get_params_info = self.candidate_parametrs().get('response')['items'][0]
         get_params_info.update(self.candidate_photo())
         return get_params_info
 
-print(Candidate_selection().unification_info())
+# print(Candidate_selection().unification_info())
+# print(Candidate_selection().take_user_all_info())
 
 # class Checking_for_id():
+#     '''
+#     Метод проверят на наличие id кандидатов в списках
+#     если id имеется в списке, то побдирает другого
+#     кандидата
+#     '''
 #     def __init__(
 #         self,
 #         ignore_list = rec_blocked(),
@@ -126,3 +149,4 @@ print(Candidate_selection().unification_info())
 #             return Candidate_selection().unification_info()
         
 # print(Checking_for_id().checking_lists())
+help(Candidate_selection)
