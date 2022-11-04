@@ -37,7 +37,7 @@ def get_users_id():
 def rec_favorites(data, user_id):
     """Функция для записи данных, добавленных пользователем в избранное. Принимает на вход json и ID пользователя"""
     if str(data['id']) not in get_favorites(user_id):
-        favorite = Favorite(favorite_id=data['id'], user_id=str(user_id))
+        favorite = Favorite(favorite_id=data['id'], user_id=user_id)
         session.add(favorite)
         session.commit()
 
@@ -45,7 +45,7 @@ def rec_favorites(data, user_id):
 def rec_blocked(data, user_id):
     """Функция для записи данных, добавленных пользователем в Black list. Принимает на вход json и ID пользователя"""
     if str(data['id']) not in get_blocked(user_id):
-        block = Blacklist(block_id=data['id'], user_id=str(user_id))
+        block = Blacklist(block_id=data['id'], user_id=user_id)
         session.add(block)
         session.commit()
 
@@ -54,7 +54,7 @@ def get_favorites(user_id):
     """Функция, которая возвращает список (STRING) с ID профилей, добаленных данным пользователем в избранное.
     Принимает ID пользователя"""
     result = []
-    for i in session.query(Favorite.favorite_id).filter(Favorite.user_id == str(user_id)):
+    for i in session.query(Favorite.favorite_id).filter(Favorite.user_id == user_id):
         for user_id in i:
             result.append(user_id)
     return result
@@ -64,7 +64,7 @@ def get_blocked(user_id):
     """Функция, которая возвращает список (STRING) с ID профилей, добаленным данным пользователем в Black list
        Принимает ID пользователя"""
     result = []
-    for i in session.query(Blacklist.block_id).filter(Blacklist.user_id == str(user_id)):
+    for i in session.query(Blacklist.block_id).filter(Blacklist.user_id == user_id):
         for user_id in i:
             result.append(user_id)
     return result

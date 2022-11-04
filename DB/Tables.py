@@ -13,33 +13,35 @@ Base = declarative_base()
 class User(Base):
     __tablename__ = 'user'
 
-    user_id = sq.Column(sq.String(length=60), primary_key=True, unique=True, nullable=False)
+    user_id = sq.Column(sq.Integer, primary_key=True, unique=True, nullable=False)
     first_name = sq.Column(sq.String(length=60), nullable=False)
     last_name = sq.Column(sq.String(length=60), nullable=False)
     age = sq.Column(sq.Integer)
     gender = sq.Column(sq.String(length=15))
     city = sq.Column(sq.String(length=60), nullable=False)
 
-    def __str__(self):
-        return f'{self.user_id}'
+    # def __str__(self):
+    #     return f'{self.user_id}'
 
 class Favorite(Base):
     __tablename__ = 'favorite'
 
-    favorite_id = sq.Column(sq.String(length=60), primary_key=True, unique=True)
-    user_id = sq.Column(sq.String(length=60), sq.ForeignKey('user.user_id'), unique=True, nullable=False)
+    favorite_id = sq.Column(sq.Integer, primary_key=True, unique=True)
+    user_id = sq.Column(sq.Integer, sq.ForeignKey('user.user_id'), unique=False, nullable=False)
     user = relationship(User, backref='favorite')
 
 
 class Blacklist(Base):
     __tablename__ = 'black_list'
 
-    block_id = sq.Column(sq.String(length=40), primary_key=True, unique=True)
-    user_id = sq.Column(sq.String(length=60), sq.ForeignKey('user.user_id'), unique=True, nullable=False)
+    block_id = sq.Column(sq.Integer, primary_key=True, unique=True)
+    user_id = sq.Column(sq.Integer, sq.ForeignKey('user.user_id'), unique=False, nullable=False)
     user = relationship(User, backref='black_list')
 
 
 def create_tables(engine):
     """ Функция для создания\удаления всех таблиц в БД"""
     # Base.metadata.drop_all(engine)  # Удаление всех таблиц
-    Base.metadata.create_all(engine) # Создание таблиц
+    Base.metadata.create_all(engine)  # Создание таблиц
+
+create_tables(engine)
