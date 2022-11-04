@@ -1,6 +1,5 @@
 import configparser
 import requests
-from bot.bot import Bot
 import datetime
 # from data import rec_blocked_list, rec_favorites_list
 # from DB.db import rec_favorites, rec_blocked
