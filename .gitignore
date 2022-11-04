@@ -1,3 +1,4 @@
 *.pyc
 __pycache__
 new_token.ini
+/token.ini
