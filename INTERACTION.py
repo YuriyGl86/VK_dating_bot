@@ -2,6 +2,7 @@ import configparser
 import requests
 from bot.bot import Bot
 import datetime
+from data import rec_blocked_list, rec_favorites_list
 # from DB.db import rec_favorites, rec_blocked
 
 config = configparser.ConfigParser()
@@ -34,7 +35,7 @@ class Candidate_selection():
         '''
         Функция берёт всю информацию о пользователе, который воспользовался ботом
         '''
-        user_info = Bot(KEY).get_user_info(Bot().get_user_info()['id'])
+        user_info = Bot(KEY).get_user_info(501244677) #(Bot().get_user_info()['id'])
         return user_info        
         
     def candidate_parametrs(self) -> dict:
@@ -125,28 +126,7 @@ class Candidate_selection():
         get_params_info.update(self.candidate_photo())
         return get_params_info
 
-# print(Candidate_selection().unification_info())
+print(Candidate_selection().unification_info())
 # print(Candidate_selection().take_user_all_info())
 
-# class Checking_for_id():
-#     '''
-#     Метод проверят на наличие id кандидатов в списках
-#     если id имеется в списке, то побдирает другого
-#     кандидата
-#     '''
-#     def __init__(
-#         self,
-#         ignore_list = rec_blocked(),
-#         favorite_list = rec_favorites(),
-#         candidate_id = Candidate_selection.unification_info()['id']
-#         ):
-#         self.IL = ignore_list
-#         self.FL = favorite_list
-#         self.CID = candidate_id
-    
-#     def checking_lists(self):
-#         if self.CID not in self.IL and self.FL:
-#             return Candidate_selection().unification_info()
-        
-# print(Checking_for_id().checking_lists())
-help(Candidate_selection)
+
