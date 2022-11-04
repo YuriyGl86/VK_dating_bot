@@ -1,5 +1,5 @@
 from sqlalchemy.orm import sessionmaker
-from Tables import create_tables, engine, Blacklist, Favorite, User
+from DB.Tables import create_tables, engine, Blacklist, Favorite, User
 from datetime import date, datetime
 
 Session = sessionmaker(bind=engine)
@@ -18,7 +18,7 @@ def calculate_age(bdate):
 
 def rec_vk_user(data):
     """Функция для записи данных пользователя в БД. Принимает на вход json"""
-    if str(data['id']) not in get_users_id():
+    if data['id'] not in get_users_id():
         user = User(user_id=data['id'], first_name=data['first_name'], last_name=data['last_name'],
                     age=calculate_age(data['bdate']), gender=data['sex'], city=data['city']['title'])
         session.add(user)

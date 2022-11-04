@@ -1,13 +1,14 @@
 from bot.bot import Bot
 import configparser
-# from DB.db import rec_favorites, rec_blocked, rec_vk_user
+from DB.db import rec_favorites, rec_blocked, rec_vk_user, get_users_id
 
 config = configparser.ConfigParser()
 config.read('new_token.ini')
 KEY = config['VK_API']['key_oauth']
+VK_TOKEN = config['VK_API']['vk_access_token']
 
 def main():
-    bot = Bot(KEY)  # Создаем объект класса Bot через который и будем управлять ботом
+    bot = Bot(KEY, VK_TOKEN)  # Создаем объект класса Bot через который и будем управлять ботом
     candidate = None  # Переменная, хранящая id предложенного кандидата
 
     for event in bot.longpoll.listen():  # Запускаем бесконечный цикл, начинаем слушать сервер ВК
@@ -16,9 +17,10 @@ def main():
             sender = event.user_id  # Получаем ID пользователя, с которым общаемся
 
             user = bot.get_user_info(sender)  # Получаем информацию о пользователе в виде json, который отправим в БД
-            print(user)
+            # print(user)
             user_name = user['first_name']
-            # rec_vk_user(user) здесь будет вызов функции от Артёма для записи юзера в БД
+            # print(get_users_id())
+            rec_vk_user(user) # вызов функции от Артёма для записи юзера в БД
 
             if received_message in ('привет', 'начать'):
                 bot.write_message(sender,
@@ -30,7 +32,7 @@ def main():
 
             elif received_message == 'в избранное':
                 if candidate:
-                    #rec_favorites(sender, candidate) здесь будет вызов функции от Артёма для записи candidate в Избранное
+                    rec_favorites(candidate, sender)  # вызов функции от Артёма для записи candidate в Избранное
                     bot.write_message(sender, 'Предложенный кандидат добавлен в избранное')
                     candidate = None
                 else:
@@ -46,7 +48,7 @@ def main():
 
             elif received_message == 'в черный список':
                 if candidate:
-                    # rec_blocked(sender, candidate) здесь будет вызов функции от Артёма для записи candidate в ЧС
+                    rec_blocked(candidate, sender)  # вызов функции от Артёма для записи candidate в ЧС
                     bot.write_message(sender, 'Предложенный кандидат добавлен в черный список')
                     candidate = None
                 else:

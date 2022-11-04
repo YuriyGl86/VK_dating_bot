@@ -8,9 +8,8 @@ from vk_api.longpoll import VkLongPoll
 from vk_api.keyboard import VkKeyboard, VkKeyboardColor
 from vk_api.longpoll import VkEventType
 
-# from DB.db import get_favorites
-
-
+from DB.db import get_favorites
+from temp import Candidate_selection
 
 class Bot:
     """
@@ -19,11 +18,12 @@ class Bot:
     :type key: str
     """
 
-    def __init__(self, key: str):
+    def __init__(self, key: str, vk_token):
         self.authorize = vk_api.VkApi(token=key)  # Авторизуемся в ВК для управления нашей группой, используя token
         self.longpoll = VkLongPoll(self.authorize)  # Выбираем тип используемого API - Long Poll API
         self.upload = VkUpload(self.authorize)  # Загрузчик изображений на сервер в ВК
         self.VkEventType = VkEventType  # Для проверки типа произошедешего события в группе ( что пришло новое сооьщение)
+        self.vk_token = vk_token
 
     @staticmethod
     def __get_keyboard_for_bot() -> dict:
@@ -114,12 +114,13 @@ class Bot:
         :return: данные кандидата
         """
         # candidate = get_candidate(user)вызываем функцию подбора кандидата от Марка, получаем данные кандидата и ссылки
-        candidate = {'id': 31539255, 'city': {'id': 185, 'title': 'Севастополь'}, 'first_name': 'Виктория',
-                     'last_name': 'Александровна', 'can_access_closed': True, 'is_closed': False,
-                     'photo': ['https://sun9-north.userapi.com/sun9-80/s/v1/if1/6_IfSpt0bV6fC3fnFOf3djs7zZW0kW-FYajV5zXYplYW5N-9T4mH4qkhG88SdPNq4CdG-u9K.jpg?size=720x1080&quality=96&type=album',
-                               'https://sun9-north.userapi.com/sun9-85/s/v1/if1/8RjXNZ07stMRMZTtpVlH5Y0WAfNP9pfK9anL9LzaWDXYN2fZPqBWKJcAL3zM4RDsVO2xbw.jpg?size=476x1080&quality=96&type=album',
-                               'https://sun9-east.userapi.com/sun9-25/s/v1/ig2/ID35QRwSB4YXQBTUVggmZ-Aib008MgooF0Zgx5yUbvWrlBkZ-5z1ObOwemQvZlZJc1FT4bmv37eAApZXgJhnxjYE.jpg?size=510x680&quality=95&type=album'
-                               ]}
+        candidate = Candidate_selection(self.vk_token).get_candidate_for_user(user)
+        # candidate = {'id': 31539255, 'city': {'id': 185, 'title': 'Севастополь'}, 'first_name': 'Виктория',
+        #              'last_name': 'Александровна', 'can_access_closed': True, 'is_closed': False,
+        #              'photo': ['https://sun9-north.userapi.com/sun9-80/s/v1/if1/6_IfSpt0bV6fC3fnFOf3djs7zZW0kW-FYajV5zXYplYW5N-9T4mH4qkhG88SdPNq4CdG-u9K.jpg?size=720x1080&quality=96&type=album',
+        #                        'https://sun9-north.userapi.com/sun9-85/s/v1/if1/8RjXNZ07stMRMZTtpVlH5Y0WAfNP9pfK9anL9LzaWDXYN2fZPqBWKJcAL3zM4RDsVO2xbw.jpg?size=476x1080&quality=96&type=album',
+        #                        'https://sun9-east.userapi.com/sun9-25/s/v1/ig2/ID35QRwSB4YXQBTUVggmZ-Aib008MgooF0Zgx5yUbvWrlBkZ-5z1ObOwemQvZlZJc1FT4bmv37eAApZXgJhnxjYE.jpg?size=510x680&quality=95&type=album'
+        #                        ]}
         candidate_id = candidate['id']
         fio = candidate['first_name'] + ' ' + candidate['last_name']
         link = 'https://vk.com/id' + str(candidate_id)
@@ -134,8 +135,8 @@ class Bot:
         :param sender: id ткущего пользователя, который общается с ботом.
         :type sender: int
         """
-        # favorites_list = get_favorites(sender) здесь будет вызов функции от Артёма, для получения списка избранного для данного user
-        favorites_list = ['82185', '82186', '82187']
+        favorites_list = get_favorites(sender) # вызов функции от Артёма, для получения списка избранного для данного user
+        # favorites_list = ['82185', '82186', '82187']
         for candidate_id in favorites_list:
             link = 'https://vk.com/id' + str(candidate_id)
             self.write_message(sender, link)
