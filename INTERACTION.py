@@ -1,25 +1,28 @@
 import configparser
 import requests
 from bot.bot import Bot
-from bot.bot_token import key
 import datetime
-from DB.db import rec_favorites, rec_blocked
+# from DB.db import rec_favorites, rec_blocked
 
 config = configparser.ConfigParser()
-config.read('token.ini')
+config.read('new_token.ini')
 TOKEN = config['VK_API']['access_token']
+KEY = config['VK_API']['key_oauth']
 
 class Candidate_selection():
     '''
-    Класс предоставляет получение информации о пользователях и их фотографий
+    Метод предоставляет получение информации о кандидатах и их фотографий
+    user_access_token -- токен авторизации приложения -> str
+    version -- версия API VK -> str
+    album, extended, rev -- параметры метода photos.get API VK
     '''
     def __init__(
         self,
         user_access_token = TOKEN,
         version = '5.131',
         album = 'profile',
-        extended = int(True),
-        rev = int(False)
+        extended = 1,
+        rev = 0
         ):
         self.UAT = user_access_token
         self.V = version
@@ -27,14 +30,17 @@ class Candidate_selection():
         self.EX = extended
         self.R = rev
         
-    def take_user_all_info(self) -> int:
+    def take_user_all_info(self) -> dict:
         '''
-        Метод берёт всю информацию о пользователе, который воспользовался ботом
+        Функция берёт всю информацию о пользователе, который воспользовался ботом
         '''
-        user_info = Bot(key).get_user_info(Bot().get_user_info())
+        user_info = Bot(KEY).get_user_info(Bot().get_user_info()['id'])
         return user_info        
         
     def candidate_parametrs(self) -> dict:
+        '''
+        Функция, которая по параметрам пользователя подбирает параметры кандидата
+        '''
         try:
             if self.take_user_all_info()['sex'] == 1:
                 natural_sex = 2
@@ -65,6 +71,9 @@ class Candidate_selection():
         return response.json()
      
     def get_parametrs_to_search(self) -> dict:
+        '''
+        Функция, которая определяет параметры фотографий со страницы кандидата
+        '''
         for own_id in self.candidate_parametrs().values():
             candidat_id = own_id['items'][0]['id']
         url = 'https://api.vk.com/method/photos.get'
@@ -83,6 +92,10 @@ class Candidate_selection():
         return response.json()
 
     def candidate_photo(self) -> dict:
+        '''
+        Функция возвращает словарь с тремя самыми поплуярными фотографиями 
+        Размеры фотографий наибольшие из представленных
+        '''
         # метод выборки фотографий с наибольшей популярностью
         list_likes = []
         list_info = []
@@ -104,25 +117,36 @@ class Candidate_selection():
         return {'photo': url_list}
 
     def unification_info(self) -> dict:
+        '''
+        Функция соединяет словарь с параметрами кандидата
+        и словарь с фотографиями кандидата
+        '''
         get_params_info = self.candidate_parametrs().get('response')['items'][0]
         get_params_info.update(self.candidate_photo())
         return get_params_info
 
 # print(Candidate_selection().unification_info())
+# print(Candidate_selection().take_user_all_info())
 
-class Checking_for_id():
-    def __init__(
-        self,
-        ignore_list = rec_blocked(),
-        favorite_list = rec_favorites(),
-        candidate_id = Candidate_selection.unification_info()['id']
-        ):
-        self.IL = ignore_list
-        self.FL = favorite_list
-        self.CID = candidate_id
+# class Checking_for_id():
+#     '''
+#     Метод проверят на наличие id кандидатов в списках
+#     если id имеется в списке, то побдирает другого
+#     кандидата
+#     '''
+#     def __init__(
+#         self,
+#         ignore_list = rec_blocked(),
+#         favorite_list = rec_favorites(),
+#         candidate_id = Candidate_selection.unification_info()['id']
+#         ):
+#         self.IL = ignore_list
+#         self.FL = favorite_list
+#         self.CID = candidate_id
     
-    def checking_lists(self):
-        if self.CID not in self.IL and self.FL:
-            return Candidate_selection().unification_info()
+#     def checking_lists(self):
+#         if self.CID not in self.IL and self.FL:
+#             return Candidate_selection().unification_info()
         
 # print(Checking_for_id().checking_lists())
+help(Candidate_selection)
