@@ -26,7 +26,7 @@ def rec_vk_user(data):
 
 
 def get_users_id():
-    """Функция, которая возвращает список из (STRING) с ID всех зарегестрированных пользователей"""
+    """Функция, которая возвращает список из ID всех зарегестрированных пользователей"""
     result = []
     for i in session.query(User.user_id):
         for user_id in i:
@@ -51,7 +51,7 @@ def rec_blocked(data, user_id):
 
 
 def get_favorites(user_id):
-    """Функция, которая возвращает список (STRING) с ID профилей, добаленных данным пользователем в избранное.
+    """Функция, которая возвращает список из ID кандидатов, добаленных данным пользователем в избранное.
     Принимает ID пользователя"""
     result = []
     for i in session.query(Favorite.favorite_id).filter(Favorite.user_id == user_id):
@@ -61,7 +61,7 @@ def get_favorites(user_id):
 
 
 def get_blocked(user_id):
-    """Функция, которая возвращает список (STRING) с ID профилей, добаленным данным пользователем в Black list
+    """Функция, которая возвращает список из ID кандидатов, добаленным данным пользователем в Black list
        Принимает ID пользователя."""
     result = []
     for i in session.query(Blacklist.block_id).filter(Blacklist.user_id == user_id):
