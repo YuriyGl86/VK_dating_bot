@@ -1,5 +1,4 @@
 from bot.bot import Bot
-from bot.bot_token import key
 import configparser
 # from DB.db import rec_favorites, rec_blocked, rec_vk_user
 

@@ -11,6 +11,7 @@ from vk_api.longpoll import VkEventType
 # from DB.db import get_favorites
 
 
+
 class Bot:
     """
     Класс, описывающий работу бота для чата в ВК

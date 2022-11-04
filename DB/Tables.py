@@ -13,43 +13,32 @@ Base = declarative_base()
 class User(Base):
     __tablename__ = 'user'
 
-    user_id = sq.Column(sq.String(length=60), primary_key=True, unique=True)
+    user_id = sq.Column(sq.Integer, primary_key=True, unique=True, nullable=False)
     first_name = sq.Column(sq.String(length=60), nullable=False)
     last_name = sq.Column(sq.String(length=60), nullable=False)
     age = sq.Column(sq.Integer)
     gender = sq.Column(sq.String(length=15))
     city = sq.Column(sq.String(length=60), nullable=False)
 
-    def __str__(self):
-        return f'{self.user_id}'
 
 class Favorite(Base):
     __tablename__ = 'favorite'
 
-    favorite_id = sq.Column(sq.String, primary_key=True, unique=True)
-    user_id = sq.Column(sq.String(length=60), sq.ForeignKey('user.user_id'), unique=True, nullable=False)
+    favorite_id = sq.Column(sq.Integer, primary_key=True, unique=True)
+    user_id = sq.Column(sq.Integer, sq.ForeignKey('user.user_id'), unique=False, nullable=False)
     user = relationship(User, backref='favorite')
 
 
-class Black_list(Base):
+class Blacklist(Base):
     __tablename__ = 'black_list'
 
-    block_user_id = sq.Column(sq.String(length=40), primary_key=True, unique=True)
-    user_id = sq.Column(sq.String(length=60), sq.ForeignKey('user.user_id'), unique=True, nullable=False)
+    block_id = sq.Column(sq.Integer, primary_key=True, unique=True)
+    user_id = sq.Column(sq.Integer, sq.ForeignKey('user.user_id'), unique=False, nullable=False)
     user = relationship(User, backref='black_list')
 
 
-class Photo(Base):
-    __tablename__ = 'pop_photo'
-
-    link = sq.Column(sq.String(length=200), primary_key=True, unique=True)
-    favorite_id = sq.Column(sq.String, sq.ForeignKey('favorite.favorite_id'), unique=True, nullable=False)
-    favorite = relationship(Favorite, backref='pop_photo')
-
-
 def create_tables(engine):
-    Base.metadata.drop_all(engine)
-    Base.metadata.create_all(engine)
+    """ Функция для создания\удаления всех таблиц в БД"""
+    # Base.metadata.drop_all(engine)  # Удаление всех таблиц
+    Base.metadata.create_all(engine)  # Создание таблиц
 
-
-create_tables(engine)
