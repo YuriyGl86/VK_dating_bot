@@ -20,8 +20,6 @@ class User(Base):
     gender = sq.Column(sq.String(length=15))
     city = sq.Column(sq.String(length=60), nullable=False)
 
-    # def __str__(self):
-    #     return f'{self.user_id}'
 
 class Favorite(Base):
     __tablename__ = 'favorite'
