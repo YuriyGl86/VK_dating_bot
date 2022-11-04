@@ -42,4 +42,3 @@ def create_tables(engine):
     # Base.metadata.drop_all(engine)  # Удаление всех таблиц
     Base.metadata.create_all(engine)  # Создание таблиц
 
-create_tables(engine)
