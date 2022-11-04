@@ -2,7 +2,7 @@ import configparser
 import requests
 from bot.bot import Bot
 import datetime
-from data import rec_blocked_list, rec_favorites_list
+# from data import rec_blocked_list, rec_favorites_list
 # from DB.db import rec_favorites, rec_blocked
 
 config = configparser.ConfigParser()
@@ -29,30 +29,26 @@ class Candidate_selection():
         self.V = version
         self.A = album
         self.EX = extended
-        self.R = rev
-        
-    def take_user_all_info(self) -> dict:
+        self.R = rev      
+    
+    user_info = {'id': 501244677, 'bdate': '7.3.1993', 'city': {'id': 185, 'title': 'Севастополь'}, 'sex': 2, 'first_name': 'Марк', 'last_name': 'Изотов', 'can_access_closed': True, 'is_closed': False}
+   
+    def candidate_parametrs(self, user_info: dict) -> dict:
         '''
-        Функция берёт всю информацию о пользователе, который воспользовался ботом
-        '''
-        user_info = Bot(KEY).get_user_info(501244677) #(Bot().get_user_info()['id'])
-        return user_info        
-        
-    def candidate_parametrs(self) -> dict:
-        '''
-        Функция, которая по параметрам пользователя подбирает параметры кандидата
+        Функция, которая по параметрам пользователя подбирает параметры для кандидата
+        user_info -- принимает на вход параметры пользователя
         '''
         try:
-            if self.take_user_all_info()['sex'] == 1:
+            if user_info['sex'] == 1:
                 natural_sex = 2
-            elif self.take_user_all_info()['sex'] == 2:
+            elif user_info['sex'] == 2:
                 natural_sex = 1
             else:
                 KeyError
         except KeyError:
             return 'Не определён пол'
-        candidate_city = self.take_user_all_info()['city']['title']
-        user_age = datetime.datetime.now().year - int(self.take_user_all_info()['bdate'][4:])
+        candidate_city = user_info['city']['title']
+        user_age = datetime.datetime.now().year - int(user_info['bdate'][4:])
         url = 'https://api.vk.com/method/users.search'
         response = requests.get(
             url,
@@ -122,11 +118,13 @@ class Candidate_selection():
         Функция соединяет словарь с параметрами кандидата
         и словарь с фотографиями кандидата
         '''
-        get_params_info = self.candidate_parametrs().get('response')['items'][0]
+        get_params_info = self.candidate_parametrs(self.user_info).get('response')['items'][0]
         get_params_info.update(self.candidate_photo())
         return get_params_info
 
+
+# getx = Candidate_selection().candidate_parametrs(Candidate_selection.user_info)
+# print(getx)
 print(Candidate_selection().unification_info())
-# print(Candidate_selection().take_user_all_info())
 
 
