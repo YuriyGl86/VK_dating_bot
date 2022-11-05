@@ -50,7 +50,7 @@ class Candidate_selection():
                 'sex': natural_sex,
                 'v': self.version,
                 'offset': candidate_count,
-                'count': 1
+                'count': 500
             }
         )
         return response.json()['response']
