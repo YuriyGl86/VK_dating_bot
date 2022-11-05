@@ -40,8 +40,6 @@ class Candidate_selection():
         response = requests.get(
             url,
             params = {
-                'is_closed': False,
-                'can_access_closed': False,
                 'access_token': self.token,
                 'fields': 'city, bdate, sex',
                 'age_from': user_age - 3,
@@ -50,7 +48,7 @@ class Candidate_selection():
                 'sex': natural_sex,
                 'v': self.version,
                 'offset': candidate_count,
-                'count': 500
+                'count': 1
             }
         )
         return response.json()['response']
