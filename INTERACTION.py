@@ -1,14 +1,11 @@
-# userk = {'id': 501244677, 'bdate': '7.3.1993', 'city': {'id': 185, 'title': 'Севастополь'}, 'sex': 2, 'first_name': 'Марк', 'last_name': 'Изотов', 'can_access_closed': True, 'is_closed': False}
 import configparser
 import requests
 import datetime
-
-# from DB.db import rec_favorites, rec_blocked
+from DB.db import get_favorites, get_blocked
 
 config = configparser.ConfigParser()
 config.read('new_token.ini')
 TOKEN = config['VK_API']['access_token']
-KEY = config['VK_API']['key_oauth']
 
 class Candidate_selection():
     '''
@@ -20,26 +17,8 @@ class Candidate_selection():
     def __init__(self, user):
         self.user = user
         self.token = TOKEN
-        # self.key = KEY
         self.version = '5.131'
-        
-    # def all_info(self) -> dict:
-    #     '''
-    #     Функция берёт всю информацию о пользователе, который воспользовался ботом
-    #     '''
-    #     user_id = 'markinmarch'
-    #     url = 'https://api.vk.com/method/users.get'
-    #     response = requests.get(
-    #         url,
-    #         params = {
-    #             'access_token': self.key,
-    #             'user_ids': user_id,
-    #             'fields': 'city, sex, bdate',
-    #             'v': self.version
-    #             }
-    #     )
-    #     return response.json().get('response')[0]
-    
+
     def candidate_parametrs(self) -> dict:
         '''
         Функция, которая по параметрам пользователя подбирает параметры кандидата
@@ -54,6 +33,7 @@ class Candidate_selection():
         except KeyError:
             return 'Не определён пол'
         candidate_city = self.user['city']['title']
+        candidate_count = len(get_blocked(self.user['id']) + get_favorites(self.user['id'])) + 1
         user_year = self.user['bdate'].split('.')[2]
         user_age = datetime.datetime.now().year - int(user_year)
         url = 'https://api.vk.com/method/users.search'
@@ -69,6 +49,7 @@ class Candidate_selection():
                 'hometown': candidate_city,
                 'sex': natural_sex,
                 'v': self.version,
+                'offset': candidate_count,
                 'count': 1
             }
         )
@@ -121,10 +102,3 @@ class Candidate_selection():
         candidat = self.candidate_parametrs()['items'][0]
         candidat.update(self.candidate_photo())
         return candidat
-
-
-# if __name__ == '__main__':
-#     x = Candidate_selection(user=userk)
-#     # print(x.user)
-#     print(x.get_candidate_for_user())
-    
