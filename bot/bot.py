@@ -9,7 +9,7 @@ from vk_api.keyboard import VkKeyboard, VkKeyboardColor
 from vk_api.longpoll import VkEventType
 
 from DB.db import get_favorites
-from temp import Candidate_selection
+from INTERACTION import Candidate_selection
 
 class Bot:
     """
@@ -114,7 +114,7 @@ class Bot:
         :return: данные кандидата
         """
         # candidate = get_candidate(user)вызываем функцию подбора кандидата от Марка, получаем данные кандидата и ссылки
-        candidate = Candidate_selection(self.vk_token).get_candidate_for_user(user)
+        candidate = Candidate_selection(user).get_candidate_for_user()
         # candidate = {'id': 31539255, 'city': {'id': 185, 'title': 'Севастополь'}, 'first_name': 'Виктория',
         #              'last_name': 'Александровна', 'can_access_closed': True, 'is_closed': False,
         #              'photo': ['https://sun9-north.userapi.com/sun9-80/s/v1/if1/6_IfSpt0bV6fC3fnFOf3djs7zZW0kW-FYajV5zXYplYW5N-9T4mH4qkhG88SdPNq4CdG-u9K.jpg?size=720x1080&quality=96&type=album',
