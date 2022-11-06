@@ -85,11 +85,7 @@ def get_blocked(user_id):
         for user_id in i:
             result.append(user_id)
     return result
-rec_vk_user(data)
-rec_vk_user(data4)
-rec_viewed(11111, 82185)
-rec_viewed(22222, 82185)
-rec_viewed(33333, 12345)
-print(get_viewed(82185))
+
+
 session.commit()
 session.close()
