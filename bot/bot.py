@@ -9,7 +9,8 @@ from vk_api.keyboard import VkKeyboard, VkKeyboardColor
 from vk_api.longpoll import VkEventType
 
 from DB.db import get_favorites
-from temp import Candidate_selection
+from INTERACTION import Candidate_selection
+from temp import CandidateGenerator
 
 class Bot:
     """
@@ -78,7 +79,6 @@ class Bot:
 
         owner_id = response['owner_id']
         photo_id = response['id']
-        access_key = response['access_key']
         attachment = f'photo{owner_id}_{photo_id}'  # Собираем параметры загруженного файла в нужный формат в виде строки
         return attachment
 
@@ -113,14 +113,10 @@ class Bot:
         :type user: dict
         :return: данные кандидата
         """
-        # candidate = get_candidate(user)вызываем функцию подбора кандидата от Марка, получаем данные кандидата и ссылки
-        candidate = Candidate_selection(self.vk_token).get_candidate_for_user(user)
-        # candidate = {'id': 31539255, 'city': {'id': 185, 'title': 'Севастополь'}, 'first_name': 'Виктория',
-        #              'last_name': 'Александровна', 'can_access_closed': True, 'is_closed': False,
-        #              'photo': ['https://sun9-north.userapi.com/sun9-80/s/v1/if1/6_IfSpt0bV6fC3fnFOf3djs7zZW0kW-FYajV5zXYplYW5N-9T4mH4qkhG88SdPNq4CdG-u9K.jpg?size=720x1080&quality=96&type=album',
-        #                        'https://sun9-north.userapi.com/sun9-85/s/v1/if1/8RjXNZ07stMRMZTtpVlH5Y0WAfNP9pfK9anL9LzaWDXYN2fZPqBWKJcAL3zM4RDsVO2xbw.jpg?size=476x1080&quality=96&type=album',
-        #                        'https://sun9-east.userapi.com/sun9-25/s/v1/ig2/ID35QRwSB4YXQBTUVggmZ-Aib008MgooF0Zgx5yUbvWrlBkZ-5z1ObOwemQvZlZJc1FT4bmv37eAApZXgJhnxjYE.jpg?size=510x680&quality=95&type=album'
-        #                        ]}
+
+        candidate = Candidate_selection(user).get_candidate_for_user()
+        # candidate = CandidateGenerator(self.vk_token).get_candidate_for_user(user)
+
         candidate_id = candidate['id']
         fio = candidate['first_name'] + ' ' + candidate['last_name']
         link = 'https://vk.com/id' + str(candidate_id)
@@ -129,14 +125,16 @@ class Bot:
         self.write_message(user['id'], f'Вот отличный кандидат:\n{fio}\n{link}', attachment=attachment_photos)
         return candidate
 
-    def send_favorites_list(self, sender: int) -> None:
+    def send_favorites_list_to_user(self, sender: int) -> None:
         """
         Метод получает список избранного для указанного пользователя и отправляет в чат с пользователем в нужном формате.
         :param sender: id ткущего пользователя, который общается с ботом.
         :type sender: int
         """
         favorites_list = get_favorites(sender) # вызов функции от Артёма, для получения списка избранного для данного user
-        # favorites_list = ['82185', '82186', '82187']
+        candidates = ''
         for candidate_id in favorites_list:
-            link = 'https://vk.com/id' + str(candidate_id)
-            self.write_message(sender, link)
+            link = 'https://vk.com/id' + str(candidate_id) + '\n'
+            candidates += link
+
+        self.write_message(sender, candidates)

@@ -1,9 +1,10 @@
 import requests
 from random import choice
 from DB.db import calculate_age, get_blocked, get_favorites
+import time
 
 
-class Candidate_selection:
+class CandidateGenerator:
     """
     Класс предоставляет получение информации о пользователях и их фотографиях. Сначала пишем несколько вспомогательных
     методов, потом в одном главном методе всё объединяем и выдаем результат.
@@ -24,15 +25,19 @@ class Candidate_selection:
 
         user_age = calculate_age(user_json['bdate'])  # считаем возраст по дате рождения через функцию Артема
         url = 'https://api.vk.com/method/users.search'  # Метод поиска людей по параметрам
+        print('город для поиска = ', user_json['city']['id'], user_json['city']['title'])
         params = {'sex': 1 if user_json['sex'] == 2 else 2,
-                  'city': user_json['city']['id'],
+                  'city_id': user_json['city']['id'],
                   'age_from': user_age - 2,
                   'age_to': user_age + 2,
                   'has_photo': 1,
-                  'count': 500
+                  'count': 500,
+                  'fields': 'city'
                   }
         response = requests.get(url, params={**self.params, **params})
+        print('число записей в выборке', response.json()['response']['count'])
         candidates_list = response.json()['response']['items']  # получаем список из словарей с кандидатами
+        print('Число записей в текущем списке кандидатов = ', len(candidates_list))
         return candidates_list
 
     def get_photos_by_candidate_id(self, candidate_id):
@@ -40,11 +45,29 @@ class Candidate_selection:
         метод, который принимает id ОДНОГО кандидата и через метод photos.get запрашивает все его фотографии.
         Метода возвращает список всех фотографий.
         """
-        url = 'https://api.vk.com/method/photos.getAll'
-        params = {'owner_id': candidate_id, 'extended': 1, 'photo_sizes': 1}
+        # url = 'https://api.vk.com/method/photos.getAll'
+        # params = {'owner_id': candidate_id, 'extended': 1, 'photo_sizes': 1}
+        # response = requests.get(url, params={**self.params, **params})
+        # print(response.json())
+        # response_photo_list = response.json()['response']['items']  # Получаем список из словарей с параметрами и размерами фото
+        # print('Число фото в выборке = ', len(response_photo_list), 'позиция', )
+        # return response_photo_list
+
+        url = 'https://api.vk.com/method/photos.get'
+        params = {'owner_id': candidate_id, 'extended': 1, 'photo_sizes': 1, 'album_id': 'profile'}
         response = requests.get(url, params={**self.params, **params})
+        print('число фото в профиле', response.json()['response']['count'])
         response_photo_list = response.json()['response']['items']  # Получаем список из словарей с параметрами и размерами фото
+        print('Число фото в выборке = ', len(response_photo_list))
+        offsets = response.json()['response']['count'] // 50
+        print('offsets', offsets)
+        for offset in range(1, offsets + 1):
+            time.sleep(0.4)  # задержка, т.к. к ВК API можно обращаться не чаще 3 раз в секунду с ключем пользователя
+            add_respone = requests.get(url, params={**self.params, **params, 'offset': offset * 50}).json()['response']['items']
+            response_photo_list.extend(add_respone)
+        print('Число фото в полной выборке = ', len(response_photo_list))
         return response_photo_list
+
 
     def filter_best_candidate_photos(self, photos_list):
         """
@@ -60,7 +83,7 @@ class Candidate_selection:
             foto_lst.append((foto_likes, best_picture_url))
         foto_lst.sort(reverse=True)
         best_candidate_photos = [i[1] for i in foto_lst[:3]]
-        print(best_candidate_photos)
+        # print(best_candidate_photos)
         return best_candidate_photos
 
     def get_candidate_for_user(self, user_json):
@@ -75,13 +98,18 @@ class Candidate_selection:
         while True:
             candidate = choice(candidate_list)  # выбираем рандомно одного кандидата из списка
             if candidate['id'] not in ignore_id_list:
-                print(candidate['id'])
+                print('candidate id = ', candidate['id'])
                 try:  # блок try т.к. профиль может быть закрытым и из него будет не достать фото
                     candidate_photos = self.get_photos_by_candidate_id(candidate['id'])
                 except:
                     continue
                 best_candidate_photos = self.filter_best_candidate_photos(candidate_photos)
                 candidate['photo'] = best_candidate_photos
+                try:
+                    print('город кандидата: ', candidate['city'])
+                except:
+                    print('У кандидата нет города')
+                print('\n---------------\n')
                 return candidate
 
 
