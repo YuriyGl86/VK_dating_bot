@@ -9,7 +9,7 @@ from vk_api.keyboard import VkKeyboard, VkKeyboardColor
 
 from DB.db import get_favorites, rec_viewed
 from INTERACTION import Candidate_selection
-from temp import CandidateGenerator
+# from temp import CandidateGenerator
 
 
 class Bot:

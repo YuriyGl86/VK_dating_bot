@@ -1,3 +1,4 @@
+userk = {'id': 501244677, 'bdate': '7.3.1993', 'city': {'id': 185, 'title': 'Севастополь'}, 'sex': 2, 'first_name': 'Марк', 'last_name': 'Изотов', 'can_access_closed': True, 'is_closed': False}
 import configparser
 import requests
 import datetime
@@ -33,10 +34,7 @@ class Candidate_selection():
         except KeyError:
             return 'Не определён пол'
         candidate_city = self.user['city']['title']
-        candidate_count = len(get_blocked(self.user['id'])
-                              + get_favorites(self.user['id'])
-                              + get_viewed(self.user['id'])
-                              )
+        candidate_count = len(get_blocked(self.user['id']) + get_favorites(self.user['id']) + get_viewed(self.user))
         user_year = self.user['bdate'].split('.')[2]
         user_age = datetime.datetime.now().year - int(user_year)
         url = 'https://api.vk.com/method/users.search'
@@ -54,8 +52,8 @@ class Candidate_selection():
                 'count': 1
             }
         )
-        return response.json()['response']
-        
+        # return response.json()['response']
+        return self.user
     def candidate_photo(self) -> dict:
         '''
         Функция возвращает словарь с тремя самыми поплуярными фотографиями 
@@ -103,3 +101,5 @@ class Candidate_selection():
         candidat = self.candidate_parametrs()['items'][0]
         candidat.update(self.candidate_photo())
         return candidat
+    
+# print(Candidate_selection(userk).candidate_parametrs())

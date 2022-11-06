@@ -1,1 +1,1 @@
-# user.search -> Authorization_code_flow ->
+# user.search -> Implicit_flow ->
