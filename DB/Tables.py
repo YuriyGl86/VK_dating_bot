@@ -47,7 +47,6 @@ class Viewed(Base):
 
 def create_tables(engine):
     """ Функция для создания\удаления всех таблиц в БД"""
-    Base.metadata.drop_all(engine)  # Удаление всех таблиц
+    # Base.metadata.drop_all(engine)  # Удаление всех таблиц
     Base.metadata.create_all(engine)  # Создание таблиц
 
-create_tables(engine)
