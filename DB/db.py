@@ -1,5 +1,5 @@
 from sqlalchemy.orm import sessionmaker
-from DB.Tables import create_tables, engine, Blacklist, Favorite, User
+from DB.Tables import create_tables, engine, Blacklist, Favorite, User, Viewed
 from datetime import date, datetime
 
 Session = sessionmaker(bind=engine)
@@ -48,6 +48,23 @@ def rec_blocked(data, user_id):
         block = Blacklist(block_id=data['id'], user_id=user_id)
         session.add(block)
         session.commit()
+
+
+def rec_viewed(cand_id, user_id):
+    """Функция для записи  кандидатов, просмотренных пользователем. Принимает на вход ID кандидата и ID пользователя"""
+    view = Viewed(viewed_id=cand_id, user_id=user_id)
+    session.add(view)
+    session.commit()
+
+
+def get_viewed(user_id):
+    """Функция, которая возвращает  список просмотренных пользователем кандидатов.
+    Принимает ID пользователя"""
+    result = []
+    for i in session.query(Viewed.viewed_id).filter(Viewed.user_id == user_id):
+        for viewed_id in i:
+            result.append(viewed_id)
+    return len(result)
 
 
 def get_favorites(user_id):

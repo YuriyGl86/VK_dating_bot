@@ -1,29 +1,48 @@
+"""
+Основной модуль, описывает основную логику бота ВК и запускает его работу.
+
+Содержит основную логику бота. Использует в работе методы класса Bot, который импортируется из соответствующего
+модуля. Бот взаимодействует с базой данных, в которой хранит всех пользователей, их списки избранного и черный
+список. По этому, для корректной работы бота, на компьютере где он запускается, должна быть предварительно создана
+база данных (по умолчанию с именем VKinder) и необходимые таблицы в ней. Подробнее о том, как это сделать, можно узнать
+в документации соответствующего модуля, который предоставляет весь этот функционал. Для работы бота необходимы два
+ключа доступа (токена) к серверам ВК Api. Ключ (token) c правами доступа сообщества от имени которого будет отвечать
+бот, с доступом к сообщениям и фотографиям сообщества, хранится в переменной KEY. Второй ключ (token) c правами
+доступа пользователя, необходим для выполнения поиска кандидата и подбора фотографий, хранится в переменной VK_TOKEN.
+По умолчанию, оба ключа находятся в файле new_token.ini в переменных key_oauth и vk_access_token и загружаются
+автоматически при запуске программы. """
+
+
 from bot.bot import Bot
 import configparser
-from DB.db import rec_favorites, rec_blocked, rec_vk_user, get_users_id
+from DB.db import rec_favorites, rec_blocked, rec_vk_user
 
 config = configparser.ConfigParser()
 config.read('new_token.ini')
-KEY = config['VK_API']['key_oauth']
-VK_TOKEN = config['VK_API']['vk_access_token']
+KEY = config['VK_API']['key_oauth']  # Ключ доступа сообщества
+VK_TOKEN = config['VK_API']['vk_access_token']  # Ключ доступа пользователя
+
 
 def main():
+    """
+    Основная функция проекта. Содержит основную логику. Запускает работу бота ВК. Использует методы класса Bot и функции
+    взаимодействия с БД.
+    """
+
     bot = Bot(KEY, VK_TOKEN)  # Создаем объект класса Bot через который и будем управлять ботом
-    candidate = None  # Переменная, хранящая id предложенного кандидата
+    candidate = None  # Переменная, которая в дальнейшем будет хранить id предложенного кандидата
 
     for event in bot.longpoll.listen():  # Запускаем бесконечный цикл, начинаем слушать сервер ВК
         if event.type == bot.VkEventType.MESSAGE_NEW and event.to_me and event.text:  # И если тип события это новое сообщение и оно для меня и в нем есть текст
-            received_message = event.text.lower()  # Сохраняем полученное сообщение
-            sender = event.user_id  # Получаем ID пользователя, с которым общаемся
+            received_message = event.text.lower()  # Сохраняем полученное сообщение в нижнем регистре
+            user_id = event.user_id  # Получаем ID пользователя, который прислал нам сообщение
 
-            user = bot.get_user_info(sender)  # Получаем информацию о пользователе в виде json, который отправим в БД
-            # print(user)
+            user = bot.get_user_info(user_id)  # Получаем информацию о пользователе в виде json, который отправим в БД
             user_name = user['first_name']
-            # print(get_users_id())
-            rec_vk_user(user) # вызов функции от Артёма для записи юзера в БД
+            rec_vk_user(user)  # вызов функции от Артёма для записи юзера в БД
 
             if received_message in ('привет', 'начать'):
-                bot.write_message(sender,
+                bot.write_message(user_id,
                                   f'Привет, {user_name}, я умный бот. Я могу найти для вас отличного кандидата '
                                   f'для знакомства. Воспользуйтесь одной из моих функций. Для этого '
                                   f'введите команду сами или нажмите на соответствующую кнопку. Я понимаю следующие '
@@ -32,31 +51,30 @@ def main():
 
             elif received_message == 'в избранное':
                 if candidate:
-                    rec_favorites(candidate, sender)  # вызов функции от Артёма для записи candidate в Избранное
-                    bot.write_message(sender, 'Предложенный кандидат добавлен в избранное')
+                    rec_favorites(candidate, user_id)  # вызов функции от Артёма для записи candidate в Избранное
+                    bot.write_message(user_id, 'Предложенный кандидат добавлен в избранное')
                     candidate = None
                 else:
-                    bot.write_message(sender, 'Сначала выберите кандидата, кого добавлять в избранное')
+                    bot.write_message(user_id, 'Сначала выберите кандидата, кого добавлять в избранное')
 
             elif received_message == 'предложить кандидата':
                 candidate = bot.send_candidate(user)
 
-
             elif received_message == 'список избранных':
-                bot.write_message(sender, 'Ваш список избранных:')
-                bot.send_favorites_list(sender)
+                bot.write_message(user_id, 'Ваш список избранных:')
+                bot.send_favorites_list_to_user(user_id)
 
             elif received_message == 'в черный список':
                 if candidate:
-                    rec_blocked(candidate, sender)  # вызов функции от Артёма для записи candidate в ЧС
-                    bot.write_message(sender, 'Предложенный кандидат добавлен в черный список')
+                    rec_blocked(candidate, user_id)  # вызов функции от Артёма для записи candidate в ЧС
+                    bot.write_message(user_id, 'Предложенный кандидат добавлен в черный список')
                     candidate = None
                 else:
-                    bot.write_message(sender, 'Сначала выберите кандидата, кого добавлять в черный список')
+                    bot.write_message(user_id, 'Сначала выберите кандидата, кого добавлять в черный список')
 
             else:
                 message = 'Ничего не понятно, но очень интересно!\nЛучше воспользуйтесь одной из моих возможностей'
-                bot.write_message(sender, message=message)
+                bot.write_message(user_id, message=message)
 
 
 if __name__ == '__main__':
