@@ -7,6 +7,7 @@ config.read('new_token.ini')
 KEY = config['VK_API']['key_oauth']
 VK_TOKEN = config['VK_API']['vk_access_token']
 
+
 def main():
     bot = Bot(KEY, VK_TOKEN)  # Создаем объект класса Bot через который и будем управлять ботом
     candidate = None  # Переменная, хранящая id предложенного кандидата
@@ -20,7 +21,7 @@ def main():
             # print(user)
             user_name = user['first_name']
             # print(get_users_id())
-            rec_vk_user(user) # вызов функции от Артёма для записи юзера в БД
+            rec_vk_user(user)  # вызов функции от Артёма для записи юзера в БД
 
             if received_message in ('привет', 'начать'):
                 bot.write_message(sender,
@@ -41,10 +42,9 @@ def main():
             elif received_message == 'предложить кандидата':
                 candidate = bot.send_candidate(user)
 
-
             elif received_message == 'список избранных':
                 bot.write_message(sender, 'Ваш список избранных:')
-                bot.send_favorites_list(sender)
+                bot.send_favorites_list_to_user(sender)
 
             elif received_message == 'в черный список':
                 if candidate:

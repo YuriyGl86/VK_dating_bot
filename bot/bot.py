@@ -10,6 +10,7 @@ from vk_api.longpoll import VkEventType
 
 from DB.db import get_favorites
 from INTERACTION import Candidate_selection
+from temp import CandidateGenerator
 
 class Bot:
     """
@@ -113,8 +114,9 @@ class Bot:
         :type user: dict
         :return: данные кандидата
         """
-        # candidate = get_candidate(user)вызываем функцию подбора кандидата от Марка, получаем данные кандидата и ссылки
+
         candidate = Candidate_selection(user).get_candidate_for_user()
+        # candidate = CandidateGenerator(self.vk_token).get_candidate_for_user(user)
         # candidate = {'id': 31539255, 'city': {'id': 185, 'title': 'Севастополь'}, 'first_name': 'Виктория',
         #              'last_name': 'Александровна', 'can_access_closed': True, 'is_closed': False,
         #              'photo': ['https://sun9-north.userapi.com/sun9-80/s/v1/if1/6_IfSpt0bV6fC3fnFOf3djs7zZW0kW-FYajV5zXYplYW5N-9T4mH4qkhG88SdPNq4CdG-u9K.jpg?size=720x1080&quality=96&type=album',
@@ -129,7 +131,7 @@ class Bot:
         self.write_message(user['id'], f'Вот отличный кандидат:\n{fio}\n{link}', attachment=attachment_photos)
         return candidate
 
-    def send_favorites_list(self, sender: int) -> None:
+    def send_favorites_list_to_user(self, sender: int) -> None:
         """
         Метод получает список избранного для указанного пользователя и отправляет в чат с пользователем в нужном формате.
         :param sender: id ткущего пользователя, который общается с ботом.
