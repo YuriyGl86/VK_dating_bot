@@ -1,3 +1,5 @@
+''''''
+
 import configparser
 import requests
 import datetime
@@ -10,9 +12,9 @@ TOKEN = config['VK_API']['vk_access_token']
 class Candidate_selection():
     '''
     Метод предоставляет получение информации о кандидатах и их фотографий
-    user_access_token -- токен авторизации приложения -> str
-    version -- версия API VK -> str
-    album, extended, rev -- параметры метода photos.get API VK
+    user -- на вход принимает данные пользователя -> dict
+    token -- токен авторизации приложения -> str
+    version -- версия VK API - str
     '''
     def __init__(self, user):
         self.user = user
