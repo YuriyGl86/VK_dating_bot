@@ -1,4 +1,3 @@
-userk = {'id': 501244677, 'bdate': '7.3.1993', 'city': {'id': 185, 'title': 'Севастополь'}, 'sex': 2, 'first_name': 'Марк', 'last_name': 'Изотов', 'can_access_closed': True, 'is_closed': False}
 import configparser
 import requests
 import datetime
@@ -52,8 +51,8 @@ class Candidate_selection():
                 'count': 1
             }
         )
-        # return response.json()['response']
-        return self.user
+        return response.json()['response']
+    
     def candidate_photo(self) -> dict:
         '''
         Функция возвращает словарь с тремя самыми поплуярными фотографиями 
@@ -101,5 +100,3 @@ class Candidate_selection():
         candidat = self.candidate_parametrs()['items'][0]
         candidat.update(self.candidate_photo())
         return candidat
-    
-# print(Candidate_selection(userk).user)
