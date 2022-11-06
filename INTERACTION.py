@@ -5,7 +5,7 @@ from DB.db import get_favorites, get_blocked
 
 config = configparser.ConfigParser()
 config.read('new_token.ini')
-TOKEN = config['VK_API']['access_token']
+TOKEN = config['VK_API']['vk_access_token']
 
 class Candidate_selection():
     '''
