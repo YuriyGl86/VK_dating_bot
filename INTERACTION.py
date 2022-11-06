@@ -35,7 +35,7 @@ class Candidate_selection():
         except KeyError:
             return 'Не определён пол'
         candidate_city = self.user['city']['title']
-        candidate_count = len(get_blocked(self.user['id']) + get_favorites(self.user['id']) + get_viewed(self.user['id']))
+        candidate_count = len(get_viewed(self.user['id']))
         user_year = self.user['bdate'].split('.')[2]
         user_age = datetime.datetime.now().year - int(user_year)
         url = 'https://api.vk.com/method/users.search'
