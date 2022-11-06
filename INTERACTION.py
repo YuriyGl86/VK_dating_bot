@@ -102,4 +102,4 @@ class Candidate_selection():
         candidat.update(self.candidate_photo())
         return candidat
     
-# print(Candidate_selection(userk).candidate_parametrs())
+# print(Candidate_selection(userk).user)
