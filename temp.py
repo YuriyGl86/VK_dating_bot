@@ -105,7 +105,11 @@ class CandidateGenerator:
                     continue
                 best_candidate_photos = self.filter_best_candidate_photos(candidate_photos)
                 candidate['photo'] = best_candidate_photos
-                print('город кандидата: ', candidate['city'])
+                try:
+                    print('город кандидата: ', candidate['city'])
+                except:
+                    print('У кандидата нет города')
+                print('\n---------------\n')
                 return candidate
 
 
