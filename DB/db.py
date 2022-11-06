@@ -64,7 +64,7 @@ def get_viewed(user_id):
     for i in session.query(Viewed.viewed_id).filter(Viewed.user_id == user_id):
         for viewed_id in i:
             result.append(viewed_id)
-    return len(result)
+    return result
 
 
 def get_favorites(user_id):
