@@ -1,5 +1,5 @@
 from sqlalchemy.orm import sessionmaker
-from Tables import create_tables, engine, Blacklist, Favorite, User, Viewed
+from DB.Tables import create_tables, engine, Blacklist, Favorite, User, Viewed
 from datetime import date, datetime
 
 Session = sessionmaker(bind=engine)
