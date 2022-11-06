@@ -1,6 +1,6 @@
 import requests
 from random import choice
-from DB.db import calculate_age, get_blocked, get_favorites
+from db import calculate_age, get_blocked, get_favorites
 import time
 
 
