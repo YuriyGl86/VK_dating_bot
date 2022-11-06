@@ -37,8 +37,17 @@ class Blacklist(Base):
     user = relationship(User, backref='black_list')
 
 
+class Viewed(Base):
+    __tablename__ = 'viewed'
+    id = sq.Column(sq.Integer, primary_key=True, unique=True)
+    viewed_id = sq.Column(sq.Integer, nullable=False, unique=False)
+    user_id = sq.Column(sq.Integer, sq.ForeignKey('user.user_id'), unique=False, nullable=False)
+    user = relationship(User, backref='viewed')
+
+
 def create_tables(engine):
     """ Функция для создания\удаления всех таблиц в БД"""
-    # Base.metadata.drop_all(engine)  # Удаление всех таблиц
+    Base.metadata.drop_all(engine)  # Удаление всех таблиц
     Base.metadata.create_all(engine)  # Создание таблиц
 
+create_tables(engine)
