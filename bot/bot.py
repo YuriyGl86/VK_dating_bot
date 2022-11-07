@@ -30,15 +30,17 @@ class Bot:
         self.upload = VkUpload(self.authorize)  # Загрузчик изображений на сервер в ВК
         self.VkEventType = VkEventType  # Для проверки типа произошедшего события (что пришло новое сообщение)
         self.vk_token = vk_token  # Храним токен пользователя, через который будем подбирать кандидата.
+        self.new_user_vk_token = None  # Аттрибут экземпляра класса, будет хранить пользовательский токен
 
     @staticmethod
     def __get_keyboard_for_bot() -> dict:
         """
         Метод создает клавиатуру (кнопки) для бота.
-        :return: json клавиатуры, который можно прикрепить к отправляемому сообщению
+        :return: json с параметрами клавиатуры, который можно прикрепить к отправляемому сообщению
         """
         keyboard = VkKeyboard(one_time=False)  # создаем клавиатуру для бота
         keyboard.add_button('Начать', color=VkKeyboardColor.PRIMARY)  # добавляем кнопку
+        keyboard.add_button('Свой токен', color=VkKeyboardColor.PRIMARY)
         keyboard.add_line()
         keyboard.add_button('Предложить кандидата', color=VkKeyboardColor.PRIMARY)  # добавляем кнопку
         keyboard.add_line()  # добавляем перенос на следующую строку
@@ -129,8 +131,19 @@ class Bot:
         по которому доступен список из ссылок на фотографии пользователя.
         """
 
-        candidate = Candidate_selection(user).get_candidate_for_user()
-        # candidate = CandidateGenerator(self.vk_token).get_candidate_for_user(user)
+        if self.new_user_vk_token:
+            try:
+                candidate = Candidate_selection(user).get_candidate_for_user()
+                # candidate = CandidateGenerator(self.new_user_vk_token).get_candidate_for_user(user)
+            except:
+                message = 'Предложенный Вами токен некорректен, далее продолжаем использовать стандартный токен'
+                self.new_user_vk_token = None
+                self.write_message(user['id'], message=message)
+                candidate = Candidate_selection(user).get_candidate_for_user()
+                # candidate = CandidateGenerator(self.vk_token).get_candidate_for_user(user)
+        else:
+            candidate = Candidate_selection(user).get_candidate_for_user()
+            # candidate = CandidateGenerator(self.vk_token).get_candidate_for_user(user)
 
         candidate_id = candidate['id']  # Добавляем предложенного кандидата в список просмотренных.
         rec_viewed(candidate_id, user['id'])
@@ -155,3 +168,7 @@ class Bot:
             candidates += link
 
         self.write_message(user_id, candidates)
+
+    def change_user_token(self, new_token):
+        self.new_user_vk_token = new_token
+

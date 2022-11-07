@@ -16,6 +16,7 @@
 from bot.bot import Bot
 import configparser
 from DB.db import rec_favorites, rec_blocked, rec_vk_user
+import re
 
 config = configparser.ConfigParser()
 config.read('new_token.ini')
@@ -71,6 +72,20 @@ def main():
                     candidate = None
                 else:
                     bot.write_message(user_id, 'Сначала выберите кандидата, кого добавлять в черный список')
+
+            elif received_message == 'свой токен':
+                bot.write_message(user_id, 'Вы можете ввести свой токен, через который будет осуществляться подбор '
+                                           'кандидатов. Это должен быть токен с правами доступа пользователя. Если '
+                                           'токен окажется некорректным, то будет использоваться стандартный токен. '
+                                           'Для ввода своего токена, отправьте его отдельным сообщением в следующем '
+                                           'формате: \n\nмой токен = мой самый секретный токен\n\nОбратите внимание, '
+                                           'без кавычек, регистр букв имеет значение, знак равенства отделен одним '
+                                           'пробелом с каждой стороны!')
+
+            elif received_message.startswith('мой токен = '):
+                bot.write_message(user_id, 'Ваш токен принят к использованию')
+                new_token = received_message.split(' = ')[1]
+                bot.change_user_token(new_token)
 
             else:
                 message = 'Ничего не понятно, но очень интересно!\nЛучше воспользуйтесь одной из моих возможностей'
