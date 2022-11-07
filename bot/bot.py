@@ -41,7 +41,7 @@ class Bot:
         keyboard = VkKeyboard(one_time=False)  # создаем клавиатуру для бота
         keyboard.add_button('Начать', color=VkKeyboardColor.PRIMARY)  # добавляем кнопку
         keyboard.add_button('Свой токен', color=VkKeyboardColor.PRIMARY)
-        keyboard.add_line()
+        keyboard.add_line()  # добавляем перенос на следующую строку
         keyboard.add_button('Предложить кандидата', color=VkKeyboardColor.PRIMARY)  # добавляем кнопку
         keyboard.add_line()  # добавляем перенос на следующую строку
         keyboard.add_button('В избранное', color=VkKeyboardColor.POSITIVE)
@@ -131,7 +131,7 @@ class Bot:
         по которому доступен список из ссылок на фотографии пользователя.
         """
 
-        if self.new_user_vk_token:
+        if self.new_user_vk_token:  # Если пользователь вводил свой токен, то пробуем его использовать
             try:
                 candidate = Candidate_selection(user).get_candidate_for_user()
                 # candidate = CandidateGenerator(self.new_user_vk_token).get_candidate_for_user(user)
@@ -169,6 +169,12 @@ class Bot:
 
         self.write_message(user_id, candidates)
 
-    def change_user_token(self, new_token):
+    def change_user_token(self, new_token: str) -> None:
+        """
+        Метод прописывает пользовательский токен, который ввел пользователь через бот, в аттрибут new_user_vk_token
+        экземпляра класса Bot для дальнейшего использования в работе по подбору кандидата.
+        :param new_token:
+        :type new_token: str
+        """
         self.new_user_vk_token = new_token
 
