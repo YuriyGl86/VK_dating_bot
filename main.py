@@ -34,15 +34,16 @@ def main():
     candidate = None  # Переменная, которая в дальнейшем будет хранить id предложенного кандидата
 
     for event in bot.longpoll.listen():  # Запускаем бесконечный цикл, начинаем слушать сервер ВК
-        if event.type == bot.VkEventType.MESSAGE_NEW and event.to_me and event.text:  # И если тип события это новое сообщение и оно для меня и в нем есть текст
-            received_message = event.text.lower()  # Сохраняем полученное сообщение в нижнем регистре
+        if event.type == bot.VkEventType.MESSAGE_NEW and event.to_me and event.text:  # И если пришло текстовое сообщен.
+            received_message = event.text  # Сохраняем полученное сообщение
+            received_message_lower = received_message.lower()
             user_id = event.user_id  # Получаем ID пользователя, который прислал нам сообщение
 
-            user = bot.get_user_info(user_id)  # Получаем информацию о пользователе в виде json, который отправим в БД
-            user_name = user['first_name']
-            rec_vk_user(user)  # вызов функции от Артёма для записи юзера в БД
+            user_info = bot.get_user_info(user_id)  # Получаем подробную информацию о пользователе в виде json
+            user_name = user_info['first_name']
+            rec_vk_user(user_info)  # вызов функции от Артёма для записи юзера в БД
 
-            if received_message in ('привет', 'начать'):
+            if received_message_lower in ('привет', 'начать'):
                 bot.write_message(user_id,
                                   f'Привет, {user_name}, я умный бот. Я могу найти для вас отличного кандидата '
                                   f'для знакомства. Воспользуйтесь одной из моих функций. Для этого '
@@ -50,7 +51,7 @@ def main():
                                   f'команды: \n"Предложить кандидата"\n"В избранное"\n"В черный список"\n'
                                   f'"Список избранных"')
 
-            elif received_message == 'в избранное':
+            elif received_message_lower == 'в избранное':
                 if candidate:
                     rec_favorites(candidate, user_id)  # вызов функции от Артёма для записи candidate в Избранное
                     bot.write_message(user_id, 'Предложенный кандидат добавлен в избранное')
@@ -58,14 +59,14 @@ def main():
                 else:
                     bot.write_message(user_id, 'Сначала выберите кандидата, кого добавлять в избранное')
 
-            elif received_message == 'предложить кандидата':
-                candidate = bot.send_candidate(user)
+            elif received_message_lower == 'предложить кандидата':
+                candidate = bot.send_candidate(user_info)
 
-            elif received_message == 'список избранных':
+            elif received_message_lower == 'список избранных':
                 bot.write_message(user_id, 'Ваш список избранных:')
                 bot.send_favorites_list_to_user(user_id)
 
-            elif received_message == 'в черный список':
+            elif received_message_lower == 'в черный список':
                 if candidate:
                     rec_blocked(candidate, user_id)  # вызов функции от Артёма для записи candidate в ЧС
                     bot.write_message(user_id, 'Предложенный кандидат добавлен в черный список')
@@ -73,19 +74,20 @@ def main():
                 else:
                     bot.write_message(user_id, 'Сначала выберите кандидата, кого добавлять в черный список')
 
-            elif received_message == 'свой токен':
+            elif received_message_lower == 'свой токен':
                 bot.write_message(user_id, 'Вы можете ввести свой токен, через который будет осуществляться подбор '
                                            'кандидатов. Это должен быть токен с правами доступа пользователя. Если '
                                            'токен окажется некорректным, то будет использоваться стандартный токен. '
                                            'Для ввода своего токена, отправьте его отдельным сообщением в следующем '
                                            'формате: \n\nмой токен = мой самый секретный токен\n\nОбратите внимание, '
-                                           'без кавычек, регистр букв имеет значение, знак равенства отделен одним '
-                                           'пробелом с каждой стороны!')
+                                           'токен вводится без кавычек, регистр букв текста "мой токен" не важен, '
+                                           'пробелы между знаком равенства не важны.')
 
-            elif received_message.startswith('мой токен = '):
+            # Проверяем, начинается ли сообщение со слов "мой токен =" в любом регистре с пробелами и без между равно
+            elif re.match(r'[Мм][Оо][Йй] [Тт][Оо][Кк][Ее][Нн] *= *', received_message):
                 bot.write_message(user_id, 'Ваш токен принят к использованию')
-                new_token = received_message.split(' = ')[1]
-                bot.change_user_token(new_token)
+                new_token = received_message.split('=')[1].strip()
+                bot.user_new_vk_token = new_token
 
             else:
                 message = 'Ничего не понятно, но очень интересно!\nЛучше воспользуйтесь одной из моих возможностей'

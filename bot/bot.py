@@ -9,7 +9,7 @@ from vk_api.keyboard import VkKeyboard, VkKeyboardColor
 
 from DB.db import get_favorites, rec_viewed
 from INTERACTION import Candidate_selection
-# from temp import CandidateGenerator
+# from temp import CandidateGenerator  # Используется для целей тестирования
 
 
 class Bot:
@@ -30,7 +30,7 @@ class Bot:
         self.upload = VkUpload(self.authorize)  # Загрузчик изображений на сервер в ВК
         self.VkEventType = VkEventType  # Для проверки типа произошедшего события (что пришло новое сообщение)
         self.vk_token = vk_token  # Храним токен пользователя, через который будем подбирать кандидата.
-        self.new_user_vk_token = None  # Аттрибут экземпляра класса, будет хранить пользовательский токен
+        self.user_new_vk_token = None  # Аттрибут экземпляра класса, будет хранить пользовательский токен
 
     @staticmethod
     def __get_keyboard_for_bot() -> dict:
@@ -131,17 +131,17 @@ class Bot:
         по которому доступен список из ссылок на фотографии пользователя.
         """
 
-        if self.new_user_vk_token:  # Если пользователь вводил свой токен, то пробуем его использовать
+        if self.user_new_vk_token:  # Если пользователь вводил свой токен, то пробуем его использовать
             try:
                 candidate = Candidate_selection(user).get_candidate_for_user()
-                # candidate = CandidateGenerator(self.new_user_vk_token).get_candidate_for_user(user)
+                # candidate = CandidateGenerator(self.user_new_vk_token).get_candidate_for_user(user)
             except:
                 message = 'Предложенный Вами токен некорректен, далее продолжаем использовать стандартный токен'
-                self.new_user_vk_token = None
+                self.user_new_vk_token = None
                 self.write_message(user['id'], message=message)
                 candidate = Candidate_selection(user).get_candidate_for_user()
                 # candidate = CandidateGenerator(self.vk_token).get_candidate_for_user(user)
-        else:
+        else:  # Если не вводил свой токен, то используем стандартный
             candidate = Candidate_selection(user).get_candidate_for_user()
             # candidate = CandidateGenerator(self.vk_token).get_candidate_for_user(user)
 
@@ -169,12 +169,5 @@ class Bot:
 
         self.write_message(user_id, candidates)
 
-    def change_user_token(self, new_token: str) -> None:
-        """
-        Метод прописывает пользовательский токен, который ввел пользователь через бот, в аттрибут new_user_vk_token
-        экземпляра класса Bot для дальнейшего использования в работе по подбору кандидата.
-        :param new_token:
-        :type new_token: str
-        """
-        self.new_user_vk_token = new_token
+
 
