@@ -22,6 +22,39 @@ class Candidate_selection():
         self.token = TOKEN
         self.version = '5.131'
 
+    def passing_closed_profile(self):
+        try:
+            if self.user['sex'] == 1:
+                natural_sex = 2
+            elif self.user['sex'] == 2:
+                natural_sex = 1
+            else:
+                KeyError
+        except KeyError:
+            return 'Не определён пол'
+        candidate_city = self.user['city']['title']
+        user_year = self.user['bdate'].split('.')[2]
+        user_age = datetime.datetime.now().year - int(user_year)
+        url = 'https://api.vk.com/method/users.search'
+        candidate_count = len(get_viewed(self.user['id']))
+        response = requests.get(
+            url,
+            params = {
+                'has_photo': 1,
+                'access_token': self.token,
+                'fields': 'city, bdate, sex',
+                'age_from': user_age - 3,
+                'age_to': user_age + 3,
+                'hometown': candidate_city,
+                'sex': natural_sex,
+                'v': self.version,
+                'offset': candidate_count+1,
+                'count': 1
+            }
+        )
+        result = response.json()['response']
+        return result
+    
     def candidate_parametrs(self) -> dict:
         '''
         Функция, которая по параметрам пользователя подбирает параметры кандидата
@@ -36,10 +69,10 @@ class Candidate_selection():
         except KeyError:
             return 'Не определён пол'
         candidate_city = self.user['city']['title']
-        candidate_count = len(get_viewed(self.user['id']))
         user_year = self.user['bdate'].split('.')[2]
         user_age = datetime.datetime.now().year - int(user_year)
         url = 'https://api.vk.com/method/users.search'
+        candidate_count = len(get_viewed(self.user['id']))
         response = requests.get(
             url,
             params = {
@@ -55,7 +88,12 @@ class Candidate_selection():
                 'count': 1
             }
         )
-        return response.json()['response']
+        result = response.json()['response']
+        while result['items'][0]['is_closed'] == True:
+            # return 'пошёл нахуй'
+            get_viewed(self.user['id']).append('None')
+            return self.candidate_parametrs()
+        return result
     
     def candidate_photo(self) -> dict:
         '''
@@ -76,6 +114,8 @@ class Candidate_selection():
             }
         )
         get_json = response.json()
+        # if get_json.values()['error_code'] == 30: #ошибка закрытого профиля
+        #     return self.candidate_parametrs()
         # метод выборки фотографий с наибольшей популярностью
         list_likes = []
         list_info = []
@@ -95,7 +135,7 @@ class Candidate_selection():
                     url = i['url']
                 url_list.append(url)
         return {'photo': url_list}
-        # return get_json
+    #     # return get_json
 
     def get_candidate_for_user(self) -> dict:
         '''
@@ -105,17 +145,6 @@ class Candidate_selection():
         candidat = self.candidate_parametrs()['items'][0]
         candidat.update(self.candidate_photo())
         return candidat
-    
-# d = {
-#     'id': 501244677,
-#     'bdate': '7.3.1993',
-#     'city': {'id': 185, 'title': 'Севастополь'},
-#     'sex': 2,
-#     'first_name': 'Марк',
-#     'last_name': 'Изотов',
-#     'can_access_closed': True,
-#     'is_closed': False
-#     }
 
 # def check_errors():
 #     d = {
@@ -128,7 +157,14 @@ class Candidate_selection():
 #     'can_access_closed': True,
 #     'is_closed': False
 #     }
-#     # print(Candidate_selection(d).candidate_parametrs())
-#     print(Candidate_selection(d).candidate_photo())
+    # print(Candidate_selection(d).candidate_parametrs())
+    # print(Candidate_selection(d).candidate_photo())
+    # print(Candidate_selection(d).get_candidate_for_user())
+    # if Candidate_selection(d).candidate_photo()['error']['error_code']==30:
+    #     print('пошёл нахер')
+    # else:
+    #     print(Candidate_selection(d).candidate_photo())
     
 # check_errors()
+
+# 'error': {'error_code': 30, 'error_msg': 'This profile is private', 
