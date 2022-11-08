@@ -133,16 +133,16 @@ class Bot:
 
         if self.user_new_vk_token:  # Если пользователь вводил свой токен, то пробуем его использовать
             try:
-                candidate = Candidate_selection(user).get_candidate_for_user()
+                candidate = Candidate_selection(user, self.user_new_vk_token).get_candidate_for_user()
                 # candidate = CandidateGenerator(self.user_new_vk_token).get_candidate_for_user(user)
             except:
                 message = 'Предложенный Вами токен некорректен, далее продолжаем использовать стандартный токен'
                 self.user_new_vk_token = None
                 self.write_message(user['id'], message=message)
-                candidate = Candidate_selection(user).get_candidate_for_user()
+                candidate = Candidate_selection(user, self.vk_token).get_candidate_for_user()
                 # candidate = CandidateGenerator(self.vk_token).get_candidate_for_user(user)
         else:  # Если не вводил свой токен, то используем стандартный
-            candidate = Candidate_selection(user).get_candidate_for_user()
+            candidate = Candidate_selection(user, self.vk_token).get_candidate_for_user()
             # candidate = CandidateGenerator(self.vk_token).get_candidate_for_user(user)
 
         candidate_id = candidate['id']  # Добавляем предложенного кандидата в список просмотренных.

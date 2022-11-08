@@ -21,9 +21,9 @@ class Candidate_selection():
     token: токен авторизации приложения -> str
     version: версия VK API - str
     '''
-    def __init__(self, user):
+    def __init__(self, user, vk_user_token):
         self.user = user
-        self.token = TOKEN
+        self.token = vk_user_token
         self.version = '5.131'
 
     def candidate_parametrs(self) -> dict:
