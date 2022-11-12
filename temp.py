@@ -45,7 +45,10 @@ class CandidateGenerator:
         print('число записей в выборке', response.json()['response']['count'])
         candidates_list = response.json()['response']['items']  # получаем список из словарей с кандидатами
         print('Число записей в текущем списке кандидатов = ', len(candidates_list))
-        return candidates_list
+        # print('пример кандидата', candidates_list[0])
+        correct_candidates_list = [i for i in candidates_list if not i['is_closed'] or i['can_access_closed']]
+        print('число корректных кандидатов', len(correct_candidates_list))
+        return correct_candidates_list
 
     def get_photos_by_candidate_id(self, candidate_id: str) -> list[dict]:
         """
